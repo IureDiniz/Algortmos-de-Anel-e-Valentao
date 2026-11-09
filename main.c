@@ -13,7 +13,6 @@ void tratarOperacoesInvalidas();
 
 typedef struct processo Processo;
 
-
 int main(){
     char* opcao;
     do{
