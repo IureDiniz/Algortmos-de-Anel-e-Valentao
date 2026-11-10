@@ -1,2 +1,5 @@
+all:
+	gcc -o main main.c
+
 run:
-	python3 main.py
+	./main

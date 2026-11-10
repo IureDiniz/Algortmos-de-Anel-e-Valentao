@@ -11,6 +11,10 @@ def conferir(processo):
     print(f"estado: {processo.estado}\n")
 
 def inicializarProcessos(n, processos):
+    if n <= 0:
+        print("Erro: a quantidade de processos deve ser positiva.")
+        return
+
     for i in range(n):
         estado = "ativo"
         processo = Processo(i, estado)
@@ -26,18 +30,34 @@ def simularFalha(id, processos):
 
     for processo in processos:
         if processo.id == id:
+
+            if processo.estado == "inativo":
+                print(f"Falha ja registrada: P{processo.id+1}.")
+                return
+
             processo.estado = "inativo"
             print(f"Falha registrada: P{processo.id+1}.")
-            break
+            return
 
-def algoritmoValentao(id, processos, mensagens):
+    print(f"Falha: processo P{id+1} inexistente.")
+
+def algoritmoValentao(id, processos, mensagens, idOriginal):
     id -= 1
+    idOriginal -= 1
+
+    if idOriginal >= len(processos):
+        print(f"Erro: processo P{idOriginal+1} inexistente.")
+        return
 
     if id >= len(processos):
         return
 
+    if processos[idOriginal].estado == "inativo":
+        print(f"Erro: processo P{processos[idOriginal].id+1} inativo.")
+        return
+
     if processos[id].estado == "inativo":
-        algoritmoValentao(id+2, processos, mensagens)
+        algoritmoValentao(id+2, processos, mensagens, idOriginal+1)
         return    
 
     processos[id].coordenador = processos[id]
@@ -54,7 +74,7 @@ def algoritmoValentao(id, processos, mensagens):
             coord = processos[i]
         i += 1
 
-    algoritmoValentao(id+2, processos, mensagens)
+    algoritmoValentao(id+2, processos, mensagens, idOriginal+1)
 
 
     i = 0
@@ -70,40 +90,60 @@ def algoritmoValentao(id, processos, mensagens):
 
             i += 1
 
-
         print(f"Valentao: coordenador P{processos[id].coordenador.id+1}; mensagens: {len(mensagens)}")
 
+
+
 def algoritmoAnel(id, processos, mensagens):
-    id -= 1
-    ativos = [id]
-    coord = processos[id]
+    inicio = id - 1
+    ativos = []
 
-    i = id
-    j = id + 1
-    while(True):
-        if j >= len(processos):
-            j = 0
+    if inicio >= len(processos):
+        print(f"Erro: processo P{inicio+1} inexistente.")
+        return
+    
+    if processos[inicio].estado == "inativo":
+        print(f"Erro: processo P{processos[inicio].id+1} inativo.")
+        return
 
-        if i >= len(processos):
-            i = 0
+    for i in range(len(processos)):
+        indice = (inicio + i) % len(processos)
 
+        if processos[indice].estado == "ativo":
+            ativos.append(indice)
 
-        if processos[j].estado == "ativo":
-            mensagens.append(f"ELECTION P{processos[i].id+1} P{processos[j].id+1}")
-            ativos.append(j)
+    coord = max(ativos)
 
-        if processos[i].id == processos[id].id-1:
-            break
+    if len(ativos) == 1:
+        processos[coord].coordenador = processos[coord]
+        print(f"Anel: coordenador P{coord+1}; mensagens 0")
+        return
 
-        i += 1
-        j += 1
+    for i in range(len(ativos)):
+        atual = ativos[i]
+        proximo = ativos[(i + 1) % len(ativos)]
 
-    print(f"Anel: coordenador P{processos[id].coordenador.id+1}; mensagens {len(mensagens)}")
+        mensagens.append(f"ELECTION P{processos[atual].id+1} P{processos[proximo].id+1}")
+
+    for i in ativos:
+        processos[i].coordenador = processos[coord]
+
+    for i in range(len(ativos)):
+        atual = ativos[i]
+        proximo = ativos[(i + 1) % len(ativos)]
+
+        mensagens.append(f"COORDINATOR P{processos[atual].id+1} P{processos[proximo].id+1}")
+
+    print(f"Anel: coordenador P{coord+1}; mensagens {len(mensagens)}")
 
 def exibirProcessos(processos):
     ativos = []
     inativos = []
     coordenador = None
+
+    if not processos:
+        print("Erro: inicialize o sistema com -n N.")
+        return
 
     for p in processos:
         if p.estado == "ativo":
@@ -113,16 +153,29 @@ def exibirProcessos(processos):
             inativos.append(p)
 
     print("Ativos:", end='')
-    for p in ativos:
-        print(f' P{p.id+1}', end='')
+    if not ativos:
+        print(" nenhum", end='')
+    else:
+        for p in ativos:
+            print(f' P{p.id+1}', end='')
 
     print("\nInativos:", end='')
-    for p in inativos:
-        print(f' P{p.id+1}', end='')
+    if not inativos:
+        print(" nenhum", end='')
+    else:
+        for p in inativos:
+            print(f' P{p.id+1}', end='')
 
-    print(f"\nCoordenador: P{coordenador.id+1}")
+    if coordenador.estado == "ativo":
+        print(f"\nCoordenador: P{coordenador.id+1}")
+    else:
+        print("\nCoordenador: indefinido")
 
 def exibirMensagens(mensagens):
+    if not mensagens:
+        print("Nenhuma mensagem registrada.")
+        return
+
     for m in mensagens:
         print(m)
 
@@ -135,12 +188,13 @@ while True:
     if escolha == "-f":
         break
     elif escolha[1] == "n":
+        processos = []
         inicializarProcessos(int(escolha[3:]), processos)
     elif escolha[1] == "x":
         simularFalha(int(escolha[3:]), processos)
     elif escolha[1] == "v":
         mensagens = []
-        algoritmoValentao(int(escolha[3:]), processos, mensagens)
+        algoritmoValentao(int(escolha[3:]), processos, mensagens, int(escolha[3:]))
     elif escolha[1] == "a":
         mensagens = []
         algoritmoAnel(int(escolha[3:]), processos, mensagens)
