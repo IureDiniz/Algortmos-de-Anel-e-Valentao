@@ -1,6 +1,8 @@
 // CÓDIGO ESCRITO ORIGINALMENTE EM PYTHON E CONVERTIDO PARA C
 // COM O USO DE INTELIGENCIA ARTIFICIAL DEVIDO A FALHA DE LEITURA
 // DA PLATAFORMA DE CORREÇÃO (TESTES MANUAIS FUNCIONAVAM NORMALMENTE)
+// ALTERAÇÕES HUMANAS REALIZADAS NO CÓDIGO EM C FORAM REALIZADOS PARA
+// CONCERTAR PEQUENOS ERROS NA SAÍDA
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -186,7 +188,7 @@ void simularFalha(int id, Processos *processos) {
         }
     }
 
-    printf("Falha: processo P%d inexistente.\n", id + 1);
+    printf("Erro: processo P%d inexistente.\n", id + 1);
 }
 
 
@@ -398,7 +400,7 @@ void algoritmoAnel(
         processos->dados[coord].coordenador = coord;
 
         printf(
-            "Anel: coordenador P%d; mensagens 0\n",
+            "Anel: coordenador P%d; mensagens: 0\n",
             coord + 1
         );
 
@@ -447,7 +449,7 @@ void algoritmoAnel(
     }
 
     printf(
-        "Anel: coordenador P%d; mensagens %zu\n",
+        "Anel: coordenador P%d; mensagens: %zu\n",
         coord + 1,
         mensagens->quantidade
     );

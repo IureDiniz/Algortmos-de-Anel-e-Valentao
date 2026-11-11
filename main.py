@@ -116,7 +116,7 @@ def algoritmoAnel(id, processos, mensagens):
 
     if len(ativos) == 1:
         processos[coord].coordenador = processos[coord]
-        print(f"Anel: coordenador P{coord+1}; mensagens 0")
+        print(f"Anel: coordenador P{coord+1}; mensagens: 0")
         return
 
     for i in range(len(ativos)):
